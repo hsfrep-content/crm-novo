@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS error_leads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   payload TEXT NOT NULL,
   reason TEXT NOT NULL,
+  source TEXT NOT NULL DEFAULT 'canal-pro',
   reviewed INTEGER NOT NULL DEFAULT 0,
   received_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -101,6 +102,12 @@ CREATE INDEX IF NOT EXISTS idx_tasks_lead ON tasks(lead_id);
 CREATE INDEX IF NOT EXISTS idx_interactions_lead ON interactions(lead_id);
 CREATE INDEX IF NOT EXISTS idx_webhook_logs_received ON webhook_logs(received_at);
 `);
+
+// Migração leve para bancos criados antes da coluna error_leads.source
+const errorLeadCols = db.prepare(`PRAGMA table_info(error_leads)`).all().map((c) => c.name);
+if (!errorLeadCols.includes('source')) {
+  db.exec(`ALTER TABLE error_leads ADD COLUMN source TEXT NOT NULL DEFAULT 'canal-pro'`);
+}
 
 // Retenção de logs de webhook: mantém no mínimo 30 dias (purga acima de 90).
 db.prepare(`DELETE FROM webhook_logs WHERE received_at < datetime('now', '-90 days')`).run();

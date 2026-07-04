@@ -77,7 +77,9 @@ const insertInteraction = db.prepare(
   'INSERT INTO interactions (lead_id, type, note) VALUES (?, ?, ?)'
 );
 const updateLog = db.prepare('UPDATE webhook_logs SET status = ?, error = ? WHERE id = ?');
-const insertErrorLead = db.prepare('INSERT INTO error_leads (payload, reason) VALUES (?, ?)');
+const insertErrorLead = db.prepare(
+  "INSERT INTO error_leads (payload, reason, source) VALUES (?, ?, 'canal-pro')"
+);
 
 function buildPhone(data) {
   const raw = data.phone ?? data.phoneNumber;

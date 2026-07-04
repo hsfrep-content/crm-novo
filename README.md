@@ -1,8 +1,11 @@
 # Imobi CRM
 
 CRM imobiliário moderno, estilo SaaS (referências: Linear, Notion, Pipedrive), com funil Kanban,
-integração com a **API Tecimob** e recebimento de leads do **Canal Pro (Grupo OLX / ZAP / Viva Real)**
-via webhook.
+integração com a **API Tecimob** e recebimento de leads por webhook do
+**Canal Pro (Grupo OLX / ZAP / Viva Real)** e do **Chaves na Mão**.
+
+> 🧪 **Quer testar as integrações sem conta nos portais?** Veja o [TESTING.md](TESTING.md) —
+> inclui um mock da API Tecimob e os comandos `curl` que simulam os webhooks.
 
 <p>
   <b>Stack:</b> React + Vite + Tailwind (frontend) · Node.js + Express + SQLite (backend) · Zod (validação)
@@ -33,7 +36,10 @@ crm-novo/
 │       ├── routes/              # leads, properties, dashboard, settings, webhooks
 │       └── services/
 │           ├── tecimob.js       # cliente HTTP único da Tecimob (retry, timeout, zod, upsert)
-│           └── canalPro.js      # processamento assíncrono e idempotente dos webhooks
+│           ├── canalPro.js      # processamento assíncrono e idempotente (Canal Pro)
+│           └── chavesNaMao.js   # processamento assíncrono e idempotente (Chaves na Mão)
+│   └── scripts/
+│       └── mock-tecimob.js      # API Tecimob fake para testes (ver TESTING.md)
 └── web/             # React + Vite + Tailwind
 ```
 
@@ -106,6 +112,20 @@ com servidor persistente e disco para o SQLite.
    **Novo Lead** do funil, com a origem e o tipo de contato (WhatsApp, formulário, pedido de
    visita etc.) registrados na timeline.
 
+### Registrando o webhook no Chaves na Mão
+
+O Chaves na Mão não tem painel self-service de webhook — a integração de leads é feita via
+suporte/parceiro comercial. Solicite o apontamento dos leads para:
+
+```
+https://seu-app.up.railway.app/webhooks/chaves-na-mao
+```
+
+O parser aceita os nomes de campo mais comuns em PT/EN (`nome`/`name`, `telefone`/`phone`,
+`mensagem`/`message`, `codigoImovel`/`referencia`…). Se o payload da sua conta usar outros
+nomes, ajuste apenas `server/src/services/chavesNaMao.js` — payloads não reconhecidos ficam
+guardados na fila de revisão com o JSON bruto, o que facilita descobrir o formato real.
+
 ### Conectando a Tecimob
 
 1. Gere a chave de API no painel da Tecimob.
@@ -139,6 +159,7 @@ com servidor persistente e disco para o SQLite.
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | `POST` | `/webhooks/canal-pro` | Webhook público do Canal Pro |
+| `POST` | `/webhooks/chaves-na-mao` | Webhook público do Chaves na Mão |
 | `GET/POST/PATCH/DELETE` | `/api/leads[/:id]` | CRUD de leads (filtros: `stage`, `tag`, `source`, `q`) |
 | `GET` | `/api/leads/export.csv` | Exportação CSV |
 | `POST/PATCH/DELETE` | `/api/leads/:id/tasks[/:taskId]` | Tarefas do lead |

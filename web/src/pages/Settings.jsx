@@ -78,13 +78,19 @@ export default function Settings() {
       </Card>
 
       <Card className="mt-4 p-5">
-        <h2 className="mb-1 text-sm font-semibold">Webhook do Canal Pro</h2>
+        <h2 className="mb-1 text-sm font-semibold">Webhooks de recebimento de leads</h2>
         <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-          Cadastre a URL abaixo no painel do Canal Pro em{' '}
+          <strong>Canal Pro:</strong> cadastre a URL abaixo em{' '}
           <em>Configurações da conta → Recebimento de leads → Integração de leads</em>:
         </p>
         <code className="mt-2 block rounded-lg bg-zinc-100 px-3 py-2 text-xs dark:bg-zinc-800">
           {window.location.origin}/webhooks/canal-pro
+        </code>
+        <p className="mt-3 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+          <strong>Chaves na Mão:</strong> solicite ao suporte/parceiro de integração o cadastro da URL:
+        </p>
+        <code className="mt-2 block rounded-lg bg-zinc-100 px-3 py-2 text-xs dark:bg-zinc-800">
+          {window.location.origin}/webhooks/chaves-na-mao
         </code>
         <p className="mt-2 text-xs text-zinc-400">
           Use a URL pública do seu deploy (Railway, Render etc.) — veja o passo a passo no README.

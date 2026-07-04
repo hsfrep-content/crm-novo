@@ -24,6 +24,7 @@ export const LEAD_TYPE_LABELS = {
 export const SOURCE_LABELS = {
   manual: 'Manual',
   'canal-pro': 'Canal Pro',
+  'chaves-na-mao': 'Chaves na Mão',
   tecimob: 'Tecimob',
   indicacao: 'Indicação',
 };

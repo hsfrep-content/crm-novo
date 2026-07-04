@@ -44,25 +44,29 @@ router.post('/integrations/tecimob/sync', async (_req, res) => {
   }
 });
 
-router.get('/integrations/status', (_req, res) => {
-  const canalPro24h = db.prepare(`
+const webhookSourceStatus = (source) => {
+  const leads24h = db.prepare(`
     SELECT COUNT(*) AS n FROM leads
-    WHERE source = 'canal-pro' AND created_at >= datetime('now', '-1 day')
-  `).get().n;
+    WHERE source = ? AND created_at >= datetime('now', '-1 day')
+  `).get(source).n;
+  const pendingErrors = db
+    .prepare('SELECT COUNT(*) AS n FROM error_leads WHERE reviewed = 0 AND source = ?')
+    .get(source).n;
+  const lastWebhook = db
+    .prepare('SELECT received_at FROM webhook_logs WHERE source = ? ORDER BY id DESC LIMIT 1')
+    .get(source);
+  return {
+    leadsLast24h: leads24h,
+    lastWebhookAt: lastWebhook?.received_at ?? null,
+    pendingErrors,
+  };
+};
 
-  const pendingErrors = db.prepare('SELECT COUNT(*) AS n FROM error_leads WHERE reviewed = 0').get().n;
-
-  const lastWebhook = db.prepare(`
-    SELECT received_at FROM webhook_logs WHERE source = 'canal-pro' ORDER BY id DESC LIMIT 1
-  `).get();
-
+router.get('/integrations/status', (_req, res) => {
   res.json({
     tecimob: getTecimobStatus(),
-    canalPro: {
-      leadsLast24h: canalPro24h,
-      lastWebhookAt: lastWebhook?.received_at ?? null,
-      pendingErrors,
-    },
+    canalPro: webhookSourceStatus('canal-pro'),
+    chavesNaMao: webhookSourceStatus('chaves-na-mao'),
   });
 });
 

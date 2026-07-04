@@ -5,6 +5,37 @@ import { useIntegrationStatus } from '../context/StatusContext';
 import { fmtDate } from '../lib';
 import { Badge, Button, Card, Spinner, EmptyState } from '../components/ui';
 
+function WebhookCard({ title, data }) {
+  return (
+    <Card className="p-5">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        <Badge tone="accent">webhook</Badge>
+      </div>
+      <dl className="space-y-1.5 text-sm">
+        <div className="flex justify-between">
+          <dt className="text-zinc-400">Leads nas últimas 24h</dt>
+          <dd className="text-xl font-semibold tabular-nums">{data?.leadsLast24h ?? 0}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-zinc-400">Último webhook</dt>
+          <dd className="font-medium">{data?.lastWebhookAt ? fmtDate(data.lastWebhookAt) : 'nenhum ainda'}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-zinc-400">Erros pendentes</dt>
+          <dd>
+            {data?.pendingErrors ? (
+              <Badge tone="amber">{data.pendingErrors} para revisar</Badge>
+            ) : (
+              <Badge tone="green">nenhum</Badge>
+            )}
+          </dd>
+        </div>
+      </dl>
+    </Card>
+  );
+}
+
 export default function Integrations() {
   const { status, refresh } = useIntegrationStatus() ?? {};
   const [errorLeads, setErrorLeads] = useState([]);
@@ -38,6 +69,7 @@ export default function Integrations() {
 
   const tecimob = status?.tecimob;
   const canalPro = status?.canalPro;
+  const chavesNaMao = status?.chavesNaMao;
 
   return (
     <div className="mx-auto max-w-3xl p-4 md:p-6">
@@ -83,38 +115,14 @@ export default function Integrations() {
           )}
         </Card>
 
-        <Card className="p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Canal Pro (OLX/ZAP/Viva Real)</h2>
-            <Badge tone="accent">webhook</Badge>
-          </div>
-          <dl className="space-y-1.5 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-zinc-400">Leads nas últimas 24h</dt>
-              <dd className="text-xl font-semibold tabular-nums">{canalPro?.leadsLast24h ?? 0}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-zinc-400">Último webhook</dt>
-              <dd className="font-medium">{canalPro?.lastWebhookAt ? fmtDate(canalPro.lastWebhookAt) : 'nenhum ainda'}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-zinc-400">Erros pendentes</dt>
-              <dd>
-                {canalPro?.pendingErrors ? (
-                  <Badge tone="amber">{canalPro.pendingErrors} para revisar</Badge>
-                ) : (
-                  <Badge tone="green">nenhum</Badge>
-                )}
-              </dd>
-            </div>
-          </dl>
-        </Card>
+        <WebhookCard title="Canal Pro (OLX/ZAP/Viva Real)" data={canalPro} />
+        <WebhookCard title="Chaves na Mão" data={chavesNaMao} />
       </div>
 
       <h2 className="mb-2 mt-8 text-sm font-semibold">Leads com erro (revisão manual)</h2>
       <p className="mb-3 text-xs text-zinc-400">
-        Webhooks do Canal Pro que chegaram com campos obrigatórios ausentes. Nada é descartado:
-        revise e cadastre manualmente se necessário.
+        Webhooks (Canal Pro / Chaves na Mão) que chegaram com campos obrigatórios ausentes. Nada é
+        descartado: revise e cadastre manualmente se necessário.
       </p>
       {errorLeads.length === 0 ? (
         <Card><EmptyState title="Nenhum lead com erro" subtitle="Tudo processado normalmente." /></Card>
@@ -125,7 +133,10 @@ export default function Integrations() {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-rose-600 dark:text-rose-300">{e.reason}</p>
-                  <p className="mt-0.5 text-xs text-zinc-400">{fmtDate(e.received_at)}</p>
+                  <p className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-400">
+                    <Badge>{e.source === 'chaves-na-mao' ? 'Chaves na Mão' : 'Canal Pro'}</Badge>
+                    {fmtDate(e.received_at)}
+                  </p>
                 </div>
                 <Button
                   variant="secondary"

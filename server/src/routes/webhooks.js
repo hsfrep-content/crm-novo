@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db.js';
 import { looksLikeCanalPro, processCanalProLead } from '../services/canalPro.js';
+import { looksLikeChavesNaMao, processChavesNaMaoLead } from '../services/chavesNaMao.js';
 
 const router = Router();
 
@@ -29,6 +30,23 @@ router.post('/canal-pro', (req, res) => {
   res.status(200).json({ received: true });
 
   setImmediate(() => processCanalProLead(body, Number(logId)));
+});
+
+// POST /webhooks/chaves-na-mao — mesmo contrato do Canal Pro:
+// valida estrutura (400 para spam), loga o payload bruto, responde 200 na hora
+// e processa assíncrono com upsert idempotente.
+router.post('/chaves-na-mao', (req, res) => {
+  const body = req.body;
+
+  if (!looksLikeChavesNaMao(body)) {
+    insertLog.run('chaves-na-mao', JSON.stringify(body ?? null), 'rejected_schema');
+    return res.status(400).json({ error: 'Payload não corresponde ao formato do Chaves na Mão.' });
+  }
+
+  const { lastInsertRowid: logId } = insertLog.run('chaves-na-mao', JSON.stringify(body), 'received');
+  res.status(200).json({ received: true });
+
+  setImmediate(() => processChavesNaMaoLead(body, Number(logId)));
 });
 
 export default router;
