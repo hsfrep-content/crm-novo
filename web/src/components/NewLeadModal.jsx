@@ -97,7 +97,7 @@ export default function NewLeadModal({ open, onClose, onCreated, defaultStage = 
             ))}
           </div>
         </Field>
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {error && <p className="text-sm text-signal-600">{error}</p>}
         <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
           <Button type="submit" disabled={saving}>{saving ? 'Salvando…' : 'Criar lead'}</Button>

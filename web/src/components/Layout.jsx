@@ -2,6 +2,27 @@ import { useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useIntegrationStatus } from '../context/StatusContext';
 import { fmtDate } from '../lib';
+import { BRAND } from '../brand';
+
+// Lockup da marca no estilo da logomarca A&L: monograma fino com o tique
+// vermelho, divisor vertical e o nome do produto em caixa alta espaçada.
+export function BrandLockup({ light = true }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className={`font-brand relative text-[26px] font-light leading-none tracking-wide ${light ? 'text-cream' : 'text-accent-600'}`}>
+        A<span className="relative">
+          &amp;
+          <span className="absolute -left-[3px] bottom-[2px] h-[11px] w-[2px] rotate-[22deg] rounded-full bg-signal-500" aria-hidden="true" />
+        </span>L
+      </span>
+      <span className={`h-7 w-px ${light ? 'bg-cream/25' : 'bg-accent-600/25'}`} aria-hidden="true" />
+      <span className={`flex flex-col text-[9px] font-semibold uppercase leading-[1.5] tracking-[0.22em] ${light ? 'text-cream/80' : 'text-accent-600/80'}`}>
+        <span>{BRAND.product}</span>
+        <span className={light ? 'text-cream/45' : 'text-accent-600/50'}>{BRAND.tagline}</span>
+      </span>
+    </div>
+  );
+}
 
 const NAV = [
   { to: '/', label: 'Funil', icon: 'M3 4h13M3 8h9M3 12h5' },
@@ -22,7 +43,7 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+      className="rounded-lg p-2 text-cream/50 transition-colors hover:bg-white/10 hover:text-cream"
       title={dark ? 'Tema claro' : 'Tema escuro'}
     >
       {dark ? (
@@ -46,7 +67,7 @@ function IntegrationBanners() {
 
   if (tecimob.lastError.code === 'auth') {
     return (
-      <div className="flex items-center gap-2 border-b border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
+      <div className="flex items-center gap-2 border-b border-signal-200 bg-signal-50 px-4 py-2 text-sm text-signal-700 dark:border-signal-500/20 dark:bg-signal-500/10 dark:text-signal-300">
         <span className="font-medium">Chave de API inválida</span> — reconecte em{' '}
         <Link to="/configuracoes" className="font-medium underline underline-offset-2">
           Configurações
@@ -75,17 +96,24 @@ export default function Layout() {
           end={item.to === '/'}
           onClick={() => setMobileOpen(false)}
           className={({ isActive }) =>
-            `flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
+            `relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
               isActive
-                ? 'bg-accent-50 text-accent-700 dark:bg-accent-500/15 dark:text-accent-300'
-                : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
+                ? 'bg-white/10 text-cream'
+                : 'text-cream/55 hover:bg-white/5 hover:text-cream/85'
             }`
           }
         >
-          <svg className="h-4 w-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-            <path d={item.icon} />
-          </svg>
-          {item.label}
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <span className="absolute inset-y-2 left-0 w-[2.5px] rounded-full bg-signal-500" aria-hidden="true" />
+              )}
+              <svg className="h-4 w-4 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d={item.icon} />
+              </svg>
+              {item.label}
+            </>
+          )}
         </NavLink>
       ))}
     </nav>
@@ -93,17 +121,14 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar desktop */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-56 flex-col border-r border-zinc-200 bg-white pt-4 md:flex dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mb-6 flex items-center gap-2 px-5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-600 text-sm font-bold text-white shadow-sm shadow-accent-600/30">
-            I
-          </div>
-          <span className="text-sm font-semibold tracking-tight">Imobi CRM</span>
+      {/* Sidebar desktop — navy petróleo da marca, nos dois temas */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-zinc-900 pt-5 md:flex dark:border-r dark:border-white/5">
+        <div className="mb-7 px-5">
+          <BrandLockup />
         </div>
         {nav}
-        <div className="mt-auto flex items-center justify-between border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
-          <span className="text-xs text-zinc-400">v1.0</span>
+        <div className="mt-auto flex items-center justify-between border-t border-white/10 px-4 py-3">
+          <span className="text-[10px] uppercase tracking-[0.18em] text-cream/35">{BRAND.domain}</span>
           <ThemeToggle />
         </div>
       </aside>
@@ -111,30 +136,34 @@ export default function Layout() {
       {/* Drawer mobile */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMobileOpen(false)}>
-          <div className="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-zinc-950/50 backdrop-blur-sm" />
           <aside
-            className="absolute inset-y-0 left-0 w-64 bg-white pt-5 shadow-xl dark:bg-zinc-900"
+            className="absolute inset-y-0 left-0 w-64 bg-zinc-900 pt-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mb-6 px-5 text-sm font-semibold">Imobi CRM</div>
+            <div className="mb-7 px-5">
+              <BrandLockup />
+            </div>
             {nav}
           </aside>
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col md:pl-56">
+      <div className="flex min-w-0 flex-1 flex-col md:pl-60">
         {/* Topbar mobile */}
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-zinc-200 bg-white/80 px-4 py-2.5 backdrop-blur md:hidden dark:border-zinc-800 dark:bg-zinc-900/80">
+        <header className="sticky top-0 z-20 flex items-center gap-3 bg-zinc-900 px-4 py-2.5 md:hidden">
           <button
             onClick={() => setMobileOpen(true)}
-            className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="rounded-lg p-1.5 text-cream/70 hover:bg-white/10"
             aria-label="Menu"
           >
             <svg className="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M3 5h14M3 10h14M3 15h14" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="text-sm font-semibold">Imobi CRM</span>
+          <span className="font-brand text-lg font-light tracking-wide text-cream">
+            A&amp;L <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream/60">{BRAND.product}</span>
+          </span>
           <div className="ml-auto">
             <ThemeToggle />
           </div>

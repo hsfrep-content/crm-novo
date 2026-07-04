@@ -71,7 +71,7 @@ export default function Dashboard() {
         <Stat
           label="Tarefas atrasadas"
           value={data.overdueTasks}
-          tone={data.overdueTasks > 0 ? 'text-rose-600 dark:text-rose-400' : ''}
+          tone={data.overdueTasks > 0 ? 'text-signal-600 dark:text-signal-400' : ''}
         />
       </div>
 
@@ -79,7 +79,7 @@ export default function Dashboard() {
         <BarList title="Leads por etapa" items={funnel} />
         <div className="space-y-4">
           <BarList title="Leads por origem" items={sources} />
-          <BarList title="Canal Pro por tipo de contato" items={leadTypes} colorClass="bg-violet-500" />
+          <BarList title="Canal Pro por tipo de contato" items={leadTypes} colorClass="bg-[#A87F1E]" />
         </div>
       </div>
     </div>

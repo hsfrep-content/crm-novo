@@ -98,7 +98,7 @@ export default function Integrations() {
             )}
           </dl>
           {tecimob?.lastError && (
-            <p className="mt-2 rounded-lg bg-rose-50 px-2.5 py-1.5 text-xs text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
+            <p className="mt-2 rounded-lg bg-signal-50 px-2.5 py-1.5 text-xs text-signal-600 dark:bg-signal-500/10 dark:text-signal-300">
               {tecimob.lastError.code === 'auth'
                 ? <>Chave de API inválida — <Link to="/configuracoes" className="underline">reconecte em Configurações</Link>.</>
                 : `Última tentativa falhou: ${tecimob.lastError.message}`}
@@ -109,7 +109,7 @@ export default function Integrations() {
             {syncing ? 'Sincronizando…' : 'Sincronizar agora'}
           </Button>
           {syncMsg && (
-            <p className={`mt-2 text-xs ${syncMsg.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-300'}`}>
+            <p className={`mt-2 text-xs ${syncMsg.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-signal-600 dark:text-signal-300'}`}>
               {syncMsg.text}
             </p>
           )}
@@ -132,7 +132,7 @@ export default function Integrations() {
             <Card key={e.id} className="p-3.5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-rose-600 dark:text-rose-300">{e.reason}</p>
+                  <p className="text-xs font-medium text-signal-600 dark:text-signal-300">{e.reason}</p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-400">
                     <Badge>{e.source === 'chaves-na-mao' ? 'Chaves na Mão' : 'Canal Pro'}</Badge>
                     {fmtDate(e.received_at)}

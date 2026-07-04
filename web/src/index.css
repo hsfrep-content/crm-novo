@@ -1,17 +1,56 @@
+@import '@fontsource-variable/manrope';
+@import '@fontsource/josefin-sans/300.css';
 @import 'tailwindcss';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Identidade A&L — derivada da logomarca:
+ *  - navy royal do monograma  → escala accent (interativos)
+ *  - creme dos fundos         → neutros claros (escala zinc reescrita)
+ *  - navy petróleo do cartão  → neutros escuros + sidebar
+ *  - vermelho do "tique"      → escala signal (alertas, atrasados, a marca)
+ * Paleta categórica das etapas validada (CVD + contraste) em claro e escuro.
+ */
 @theme {
-  --color-accent-50: #eef2ff;
-  --color-accent-100: #e0e7ff;
-  --color-accent-200: #c7d2fe;
-  --color-accent-300: #a5b4fc;
-  --color-accent-400: #818cf8;
-  --color-accent-500: #6366f1;
-  --color-accent-600: #4f46e5;
-  --color-accent-700: #4338ca;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* interativos — navy royal */
+  --color-accent-50: #f0f3f9;
+  --color-accent-100: #e2e7f3;
+  --color-accent-200: #c7d0e6;
+  --color-accent-300: #a3b1d3;
+  --color-accent-400: #7285b5;
+  --color-accent-500: #47598f;
+  --color-accent-600: #26335f;
+  --color-accent-700: #1b2547;
+
+  /* vermelho da marca (o tique) — erros, atrasados */
+  --color-signal-50: #faeded;
+  --color-signal-100: #f5dbdc;
+  --color-signal-200: #ebbabb;
+  --color-signal-300: #de9294;
+  --color-signal-400: #d05f63;
+  --color-signal-500: #c22e33;
+  --color-signal-600: #a2262a;
+  --color-signal-700: #862023;
+
+  /* creme da logomarca */
+  --color-cream: #f2ede4;
+
+  /* neutros: creme quente no claro, navy petróleo no escuro */
+  --color-zinc-50: #f7f4ec;
+  --color-zinc-100: #efeae0;
+  --color-zinc-200: #e2dcce;
+  --color-zinc-300: #b9c2c9;
+  --color-zinc-400: #8a97a5;
+  --color-zinc-500: #5e7085;
+  --color-zinc-600: #43566b;
+  --color-zinc-700: #2e4459;
+  --color-zinc-800: #1b3348;
+  --color-zinc-900: #122b40;
+  --color-zinc-950: #0b1d2c;
+
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-brand: 'Josefin Sans', 'Manrope Variable', ui-sans-serif, sans-serif;
 }
 
 html {
@@ -21,6 +60,10 @@ html {
 
 body {
   @apply bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100;
+}
+
+.font-brand {
+  font-family: var(--font-brand);
 }
 
 ::-webkit-scrollbar {
@@ -38,5 +81,5 @@ body {
   @apply rotate-2 opacity-60;
 }
 .col-drag-over {
-  @apply bg-accent-50 ring-2 ring-accent-300 dark:bg-accent-500/10 dark:ring-accent-500/40;
+  @apply bg-accent-50 ring-2 ring-accent-300 dark:bg-accent-500/10 dark:ring-accent-400/40;
 }

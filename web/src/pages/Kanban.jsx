@@ -17,7 +17,7 @@ function LeadCard({ lead, onDragStart, onClick }) {
         <p className="text-sm font-medium leading-tight">{lead.name}</p>
         {lead.overdue_tasks > 0 && (
           <span
-            className="flex h-2 w-2 shrink-0 rounded-full bg-rose-500 ring-2 ring-rose-100 dark:ring-rose-500/20"
+            className="flex h-2 w-2 shrink-0 rounded-full bg-signal-500 ring-2 ring-signal-100 dark:ring-signal-500/20"
             title={`${lead.overdue_tasks} tarefa(s) atrasada(s)`}
           />
         )}

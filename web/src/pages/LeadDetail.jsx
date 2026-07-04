@@ -184,7 +184,7 @@ export default function LeadDetail() {
                 const overdue = isOverdue(t);
                 return (
                   <li key={t.id}>
-                    <Card className={`flex items-center gap-3 p-3 ${overdue ? 'ring-rose-200 dark:ring-rose-500/30' : ''}`}>
+                    <Card className={`flex items-center gap-3 p-3 ${overdue ? 'ring-signal-200 dark:ring-signal-500/30' : ''}`}>
                       <input
                         type="checkbox"
                         checked={Boolean(t.done)}
@@ -194,7 +194,7 @@ export default function LeadDetail() {
                       <div className="min-w-0 flex-1">
                         <p className={`text-sm ${t.done ? 'text-zinc-400 line-through' : ''}`}>{t.title}</p>
                         {t.due_at && (
-                          <p className={`text-xs ${overdue ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-zinc-400'}`}>
+                          <p className={`text-xs ${overdue ? 'font-medium text-signal-600 dark:text-signal-400' : 'text-zinc-400'}`}>
                             {overdue && '⚠ Atrasada — '}{fmtDate(t.due_at)}
                           </p>
                         )}

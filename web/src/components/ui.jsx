@@ -3,11 +3,11 @@ import { useEffect } from 'react';
 export function Button({ variant = 'primary', className = '', ...props }) {
   const variants = {
     primary:
-      'bg-accent-600 text-white hover:bg-accent-700 shadow-sm shadow-accent-600/20 disabled:opacity-50',
+      'bg-accent-600 text-cream hover:bg-accent-700 shadow-sm shadow-accent-600/20 disabled:opacity-50 dark:bg-cream dark:text-accent-700 dark:shadow-none dark:hover:bg-white',
     secondary:
       'bg-white text-zinc-700 ring-1 ring-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700 dark:hover:bg-zinc-800',
     ghost: 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800',
-    danger: 'text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10',
+    danger: 'text-signal-600 hover:bg-signal-50 dark:hover:bg-signal-500/10',
   };
   return (
     <button
@@ -50,7 +50,7 @@ export function Badge({ tone = 'zinc', className = '', ...props }) {
     accent: 'bg-accent-50 text-accent-700 dark:bg-accent-500/15 dark:text-accent-300',
     green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
     amber: 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
-    rose: 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
+    rose: 'bg-signal-50 text-signal-700 dark:bg-signal-500/15 dark:text-signal-300',
   };
   return (
     <span

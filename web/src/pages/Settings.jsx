@@ -60,7 +60,7 @@ export default function Settings() {
             />
           </Field>
           {feedback && (
-            <p className={`text-sm ${feedback.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600'}`}>
+            <p className={`text-sm ${feedback.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-signal-600'}`}>
               {feedback.text}
             </p>
           )}

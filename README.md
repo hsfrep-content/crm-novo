@@ -1,6 +1,6 @@
-# Imobi CRM
+# A&L Advantage+ — CRM Imobiliário
 
-CRM imobiliário moderno, estilo SaaS (referências: Linear, Notion, Pipedrive), com funil Kanban,
+CRM da **A&L Negócios Imobiliários**, estilo SaaS (referências: Linear, Notion, Pipedrive), com funil Kanban,
 integração com a **API Tecimob** e recebimento de leads por webhook do
 **Canal Pro (Grupo OLX / ZAP / Viva Real)** e do **Chaves na Mão**.
 
@@ -101,6 +101,19 @@ O repositório já traz `Dockerfile` e `railway.json` — o Railway detecta tudo
    necessária; sem o volume o banco zera a cada redeploy.
 4. Em **Settings → Networking → Generate Domain**, gere o domínio público. Você terá algo
    como `https://seu-app.up.railway.app` — abra e o CRM já estará no ar.
+
+### Domínio próprio (crm.aelimoveis.com.br)
+
+1. No Railway, em **Settings → Networking → Custom Domain**, adicione `crm.aelimoveis.com.br`.
+2. O Railway mostrará um destino CNAME (algo como `xxxx.up.railway.app`).
+3. No painel DNS do domínio `aelimoveis.com.br` (Registro.br, Cloudflare, HostGator etc.),
+   crie um registro **CNAME** com nome `crm` apontando para esse destino.
+4. Aguarde a propagação (minutos a algumas horas). O certificado HTTPS é emitido
+   automaticamente. Depois, use `https://crm.aelimoveis.com.br/webhooks/canal-pro` e
+   `https://crm.aelimoveis.com.br/webhooks/chaves-na-mao` nos portais.
+
+> A identidade visual (navy, creme e o vermelho da marca) fica em `web/src/index.css`;
+> o nome do produto, em `web/src/brand.js` — para renomear, altere um arquivo só.
 
 ### Registrando o webhook no Canal Pro
 
