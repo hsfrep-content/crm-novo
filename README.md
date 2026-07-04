@@ -1,4 +1,4 @@
-# A&L Advantage+ — CRM Imobiliário
+# A&L Advant — CRM Imobiliário
 
 CRM da **A&L Negócios Imobiliários**, estilo SaaS (referências: Linear, Notion, Pipedrive), com funil Kanban,
 integração com a **API Tecimob** e recebimento de leads por webhook do
