@@ -89,14 +89,18 @@ com servidor persistente e disco para o SQLite.
 
 ### Railway (recomendado)
 
-1. Crie uma conta em [railway.app](https://railway.app) e clique em **New Project → Deploy from GitHub repo**, apontando para este repositório.
-2. Em **Settings → Root Directory**, deixe a raiz e configure:
-   - **Build command:** `cd web && npm install && npm run build && cd ../server && npm install`
-   - **Start command:** `cd server && npm start`
-3. Em **Variables**, adicione `APP_SECRET` (valor forte) e, se quiser, `TECIMOB_BASE_URL`.
-4. Adicione um **Volume** montado em `/data` e defina `DATA_DIR=/data` (garante que o banco sobreviva a redeploys).
-5. Em **Settings → Networking**, gere o domínio público. Você terá algo como
-   `https://seu-app.up.railway.app`.
+O repositório já traz `Dockerfile` e `railway.json` — o Railway detecta tudo sozinho
+(build do frontend, backend, healthcheck em `/health` e restart automático).
+
+1. Crie uma conta em [railway.app](https://railway.app) (login com GitHub) e clique em
+   **New Project → Deploy from GitHub repo**, apontando para este repositório.
+2. Em **Variables**, adicione apenas:
+   - `APP_SECRET` — gere com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+3. No serviço, clique com o botão direito (ou **⌘K → Create Volume**) e monte um **Volume**
+   em **`/data`** — o Dockerfile já define `DATA_DIR=/data`, então nenhuma variável extra é
+   necessária; sem o volume o banco zera a cada redeploy.
+4. Em **Settings → Networking → Generate Domain**, gere o domínio público. Você terá algo
+   como `https://seu-app.up.railway.app` — abra e o CRM já estará no ar.
 
 ### Registrando o webhook no Canal Pro
 
