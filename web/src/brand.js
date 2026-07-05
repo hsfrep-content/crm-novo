@@ -4,5 +4,5 @@ export const BRAND = {
   product: 'Advant',
   full: 'A&L Advant',
   tagline: 'CRM Imobiliário',
-  domain: 'crm.aelimoveis.com.br',
+  domain: 'advantcrm.aelimoveis.com.br',
 };

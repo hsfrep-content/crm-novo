@@ -102,15 +102,18 @@ O repositório já traz `Dockerfile` e `railway.json` — o Railway detecta tudo
 4. Em **Settings → Networking → Generate Domain**, gere o domínio público. Você terá algo
    como `https://seu-app.up.railway.app` — abra e o CRM já estará no ar.
 
-### Domínio próprio (crm.aelimoveis.com.br)
+### Domínio próprio (advantcrm.aelimoveis.com.br)
 
-1. No Railway, em **Settings → Networking → Custom Domain**, adicione `crm.aelimoveis.com.br`.
-2. O Railway mostrará um destino CNAME (algo como `xxxx.up.railway.app`).
+1. No Railway, em **Settings → Networking → Custom Domain**, adicione `advantcrm.aelimoveis.com.br`.
+2. O Railway mostrará dois registros: um **CNAME** (destino `xxxx.up.railway.app`) e um
+   **TXT** de verificação (`_railway-verify.advantcrm` → `railway-verify=...`).
 3. No painel DNS do domínio `aelimoveis.com.br` (Registro.br, Cloudflare, HostGator etc.),
-   crie um registro **CNAME** com nome `crm` apontando para esse destino.
+   crie **os dois registros** exatamente como mostrados — CNAME com nome `advantcrm` e o TXT
+   com o valor completo. No Cloudflare, deixe o CNAME como "DNS only" (nuvem cinza) até a
+   validação concluir.
 4. Aguarde a propagação (minutos a algumas horas). O certificado HTTPS é emitido
-   automaticamente. Depois, use `https://crm.aelimoveis.com.br/webhooks/canal-pro` e
-   `https://crm.aelimoveis.com.br/webhooks/chaves-na-mao` nos portais.
+   automaticamente. Depois, use `https://advantcrm.aelimoveis.com.br/webhooks/canal-pro` e
+   `https://advantcrm.aelimoveis.com.br/webhooks/chaves-na-mao` nos portais.
 
 > A identidade visual (navy, creme e o vermelho da marca) fica em `web/src/index.css`;
 > o nome do produto, em `web/src/brand.js` — para renomear, altere um arquivo só.
