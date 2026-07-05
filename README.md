@@ -71,10 +71,49 @@ cd ../server && npm install && npm start   # tudo em http://localhost:4000
 
 | Variável | Obrigatória | Descrição |
 | --- | --- | --- |
-| `APP_SECRET` | ✅ | Segredo usado para criptografar a chave Tecimob no banco (AES-256-GCM). Gere com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `APP_SECRET` | ✅ | Segredo usado para criptografar a chave Tecimob e assinar as sessões de login. Gere com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `GOOGLE_CLIENT_ID` | recomendada | Ativa o login com Google. Sem ela o CRM fica **aberto** e exibe um aviso permanente. Ver seção "Login com Google" |
+| `ALLOWED_EMAILS` | com login | E-mails autorizados, separados por vírgula. Aceita domínio inteiro com `@`: `ana@gmail.com,@aelimoveis.com.br` |
 | `PORT` | — | Porta do servidor (padrão `4000`) |
 | `TECIMOB_BASE_URL` | — | URL base da API Tecimob (padrão `https://api.tecimob.com.br`) |
 | `DATA_DIR` | — | Diretório do SQLite (padrão `server/data`). Em deploys com volume persistente, aponte para o volume (ex.: `/data`) |
+
+## Login com Google
+
+O acesso ao CRM é feito **exclusivamente com conta Google** (Google Identity Services),
+restrito a uma lista de e-mails autorizados. Os webhooks dos portais e o `/health`
+continuam públicos — só a interface e a API interna exigem sessão.
+
+**1. Crie o OAuth Client ID (5 min, uma vez só):**
+
+1. Acesse [console.cloud.google.com](https://console.cloud.google.com) com sua conta Google.
+2. Crie um projeto (ex.: "Advant CRM") se ainda não tiver.
+3. Menu **APIs e Serviços → Tela de permissão OAuth**: tipo **Externo**, preencha nome do app
+   ("A&L Advant") e e-mail de contato. Não precisa adicionar escopos nem enviar para verificação —
+   login básico (e-mail/perfil) funciona imediatamente.
+4. Menu **APIs e Serviços → Credenciais → Criar credenciais → ID do cliente OAuth**:
+   - Tipo: **Aplicativo da Web**
+   - **Origens JavaScript autorizadas**: adicione todas as URLs do CRM:
+     - `https://advantcrm.aelimoveis.com.br`
+     - `https://advant-production.up.railway.app`
+     - `http://localhost:5173` e `http://localhost:4000` (para desenvolvimento)
+   - Não precisa de "URIs de redirecionamento".
+5. Copie o **ID do cliente** (termina em `.apps.googleusercontent.com`).
+
+**2. Configure no Railway (Variables):**
+
+```
+GOOGLE_CLIENT_ID=SEU_ID.apps.googleusercontent.com
+ALLOWED_EMAILS=seuemail@gmail.com
+```
+
+O redeploy é automático. A partir daí a tela de login aparece, e só as contas listadas entram.
+
+**Notas:**
+- Para liberar um novo corretor: adicione o e-mail em `ALLOWED_EMAILS` (o Railway redeploya).
+  Remover um e-mail da lista revoga o acesso imediatamente, mesmo com sessão ativa.
+- A sessão dura 7 dias, em cookie httpOnly assinado com o `APP_SECRET`.
+- Sem `GOOGLE_CLIENT_ID` o CRM roda em modo aberto (útil em desenvolvimento) com um banner de aviso.
 
 Nenhum segredo fica hardcoded: a chave Tecimob entra pela tela de **Configurações**, é
 criptografada e nunca volta ao navegador.

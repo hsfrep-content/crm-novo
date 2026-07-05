@@ -10,22 +10,32 @@ import leadsRouter from './routes/leads.js';
 import propertiesRouter from './routes/properties.js';
 import dashboardRouter from './routes/dashboard.js';
 import settingsRouter from './routes/settings.js';
+import { authRouter, requireAuth, authEnabled } from './auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
+app.set('trust proxy', 1); // Railway/proxies: necessário para cookie Secure
 app.use(cors());
-app.use(express.json({ limit: '256kb' }));
+app.use(express.json({ limit: '512kb' }));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
-// Webhook público do Canal Pro (fora do prefixo /api)
+// Públicos: webhooks dos portais (fora do /api) e o endpoint de login
 app.use('/webhooks', webhooksRouter);
+app.use('/api/auth', authRouter);
 
-app.use('/api/leads', leadsRouter);
-app.use('/api/properties', propertiesRouter);
-app.use('/api/dashboard', dashboardRouter);
-app.use('/api/settings', settingsRouter);
+// Todo o restante da API exige sessão (quando o login Google está ativo)
+app.use('/api/leads', requireAuth, leadsRouter);
+app.use('/api/properties', requireAuth, propertiesRouter);
+app.use('/api/dashboard', requireAuth, dashboardRouter);
+app.use('/api/settings', requireAuth, settingsRouter);
+
+if (!authEnabled) {
+  console.warn(
+    '[auth] Login Google DESATIVADO (GOOGLE_CLIENT_ID ausente) — o CRM está aberto. Veja o README para ativar.'
+  );
+}
 
 // Em produção serve o build do frontend, se existir (deploy single-service)
 const webDist = path.join(__dirname, '..', '..', 'web', 'dist');

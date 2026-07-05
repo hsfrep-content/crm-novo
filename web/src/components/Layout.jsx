@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
 import { useIntegrationStatus } from '../context/StatusContext';
+import { useAuth } from '../context/AuthContext';
 import { fmtDate } from '../lib';
 import { BRAND } from '../brand';
 
@@ -60,27 +61,68 @@ function ThemeToggle() {
   );
 }
 
+function UserFooter() {
+  const { enabled, user, logout } = useAuth() ?? {};
+  if (!enabled || !user) return <span className="text-[10px] uppercase tracking-[0.18em] text-cream/35">{BRAND.domain}</span>;
+  return (
+    <div className="flex min-w-0 items-center gap-2">
+      {user.picture ? (
+        <img src={user.picture} alt="" referrerPolicy="no-referrer" className="h-6 w-6 rounded-full ring-1 ring-white/20" />
+      ) : (
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-[10px] font-semibold text-cream">
+          {user.name?.[0]?.toUpperCase() ?? '?'}
+        </span>
+      )}
+      <span className="truncate text-xs text-cream/70" title={user.email}>{user.name}</span>
+      <button
+        onClick={logout}
+        title="Sair"
+        className="ml-auto rounded-md p-1 text-cream/40 hover:bg-white/10 hover:text-cream"
+      >
+        <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 14H3V2h3M10 11l3-3-3-3M13 8H6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 function IntegrationBanners() {
   const { status } = useIntegrationStatus() ?? {};
+  const { enabled: authOn, loading: authLoading } = useAuth() ?? {};
   const tecimob = status?.tecimob;
-  if (!tecimob?.lastError) return null;
 
-  if (tecimob.lastError.code === 'auth') {
-    return (
+  const authWarning = !authLoading && authOn === false && (
+    <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+      <span className="font-medium">CRM sem login</span> — qualquer pessoa com o link acessa. Ative o
+      login com Google definindo <code className="text-xs">GOOGLE_CLIENT_ID</code> e{' '}
+      <code className="text-xs">ALLOWED_EMAILS</code> no servidor (passo a passo no README).
+    </div>
+  );
+
+  if (!tecimob?.lastError) return authWarning || null;
+
+  const tecimobBanner =
+    tecimob.lastError.code === 'auth' ? (
       <div className="flex items-center gap-2 border-b border-signal-200 bg-signal-50 px-4 py-2 text-sm text-signal-700 dark:border-signal-500/20 dark:bg-signal-500/10 dark:text-signal-300">
         <span className="font-medium">Chave de API inválida</span> — reconecte em{' '}
         <Link to="/configuracoes" className="font-medium underline underline-offset-2">
           Configurações
         </Link>
       </div>
+    ) : (
+      <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+        Sincronização com a Tecimob indisponível no momento
+        {tecimob.lastSyncAt ? ` — últimos dados salvos às ${fmtDate(tecimob.lastSyncAt)}` : ''}. O CRM
+        segue funcionando com os dados locais.
+      </div>
     );
-  }
+
   return (
-    <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
-      Sincronização com a Tecimob indisponível no momento
-      {tecimob.lastSyncAt ? ` — últimos dados salvos às ${fmtDate(tecimob.lastSyncAt)}` : ''}. O CRM
-      segue funcionando com os dados locais.
-    </div>
+    <>
+      {authWarning}
+      {tecimobBanner}
+    </>
   );
 }
 
@@ -127,8 +169,10 @@ export default function Layout() {
           <BrandLockup />
         </div>
         {nav}
-        <div className="mt-auto flex items-center justify-between border-t border-white/10 px-4 py-3">
-          <span className="text-[10px] uppercase tracking-[0.18em] text-cream/35">{BRAND.domain}</span>
+        <div className="mt-auto flex items-center gap-2 border-t border-white/10 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <UserFooter />
+          </div>
           <ThemeToggle />
         </div>
       </aside>

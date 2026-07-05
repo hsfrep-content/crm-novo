@@ -19,6 +19,10 @@ async function request(path, options = {}) {
     /* respostas sem corpo */
   }
   if (!res.ok) {
+    // Sessão expirada em qualquer chamada → volta para a tela de login
+    if (res.status === 401 && !path.startsWith('/api/auth')) {
+      window.dispatchEvent(new Event('auth:expired'));
+    }
     throw new ApiError(body?.error || `Erro ${res.status}`, res.status, body?.code);
   }
   return body;
@@ -33,6 +37,13 @@ export class ApiError extends Error {
 }
 
 export const api = {
+  auth: {
+    config: () => request('/api/auth/config'),
+    me: () => request('/api/auth/me'),
+    google: (credential) =>
+      request('/api/auth/google', { method: 'POST', body: JSON.stringify({ credential }) }),
+    logout: () => request('/api/auth/logout', { method: 'POST' }),
+  },
   leads: {
     list: (filters = {}) => {
       const qs = new URLSearchParams(Object.entries(filters).filter(([, v]) => v));
