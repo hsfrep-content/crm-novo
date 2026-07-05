@@ -4,12 +4,15 @@ import { api } from '../api';
 import { NEIGHBORHOODS, STAGES, stageById, SOURCE_LABELS, fmtDate } from '../lib';
 import { Badge, Button, Card, Input, Select, EmptyState } from '../components/ui';
 import NewLeadModal from '../components/NewLeadModal';
+import ImportLeadsModal from '../components/ImportLeadsModal';
 
 export default function Leads() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ q: '', tag: '', stage: '', source: '' });
   const [modalOpen, setModalOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -21,7 +24,7 @@ export default function Leads() {
         .finally(() => setLoading(false));
     }, 250); // debounce da busca
     return () => clearTimeout(t);
-  }, [filters]);
+  }, [filters, reloadKey]);
 
   const set = (k) => (e) => setFilters((f) => ({ ...f, [k]: e.target.value }));
 
@@ -29,6 +32,12 @@ export default function Leads() {
     <div className="mx-auto max-w-5xl p-4 md:p-6">
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <h1 className="mr-auto text-lg font-semibold tracking-tight">Contatos</h1>
+        <Button variant="secondary" onClick={() => setImportOpen(true)}>
+          <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M8 10V2m0 0L5 5m3-3l3 3M3 13h10" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Importar CSV
+        </Button>
         <a href={api.leads.exportUrl} download>
           <Button variant="secondary">
             <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -135,6 +144,11 @@ export default function Leads() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onCreated={(lead) => setLeads((ls) => [{ ...lead, overdue_tasks: 0 }, ...ls])}
+      />
+      <ImportLeadsModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => setReloadKey((k) => k + 1)}
       />
     </div>
   );

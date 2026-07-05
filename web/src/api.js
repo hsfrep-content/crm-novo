@@ -51,6 +51,8 @@ export const api = {
     linkProperty: (id, propertyId) => request(`/api/leads/${id}/properties/${propertyId}`, { method: 'POST' }),
     unlinkProperty: (id, propertyId) => request(`/api/leads/${id}/properties/${propertyId}`, { method: 'DELETE' }),
     exportUrl: '/api/leads/export.csv',
+    import: (leads, options = {}) =>
+      request('/api/leads/import', { method: 'POST', body: JSON.stringify({ leads, ...options }) }),
   },
   properties: {
     list: (q) => request(`/api/properties${q ? `?q=${encodeURIComponent(q)}` : ''}`),

@@ -29,6 +29,7 @@ export const SOURCE_LABELS = {
   'chaves-na-mao': 'Chaves na Mão',
   tecimob: 'Tecimob',
   indicacao: 'Indicação',
+  importacao: 'Importação',
 };
 
 export function fmtDate(value) {

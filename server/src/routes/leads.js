@@ -73,6 +73,71 @@ router.get('/export.csv', (_req, res) => {
   res.send('﻿' + [headers.join(','), ...lines].join('\n'));
 });
 
+// POST /api/leads/import — importação em massa (planilhas RD Station etc.)
+// Idempotente: telefone normalizado (só dígitos) é a chave de deduplicação,
+// tanto contra o banco quanto dentro do próprio arquivo — reimportar a mesma
+// planilha não cria duplicatas.
+const importSchema = z.object({
+  leads: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(200),
+        phone: z.string().max(40).nullish(),
+        email: z.string().max(200).nullish(),
+      })
+    )
+    .min(1)
+    .max(2000),
+  source: z.string().max(40).default('importacao'),
+  stage: z.enum(STAGES).default('novo_lead'),
+});
+
+const findByPhone = db.prepare(
+  `SELECT id FROM leads WHERE replace(replace(replace(replace(phone,'(',''),')',''),'-',''),' ','') = ?`
+);
+const insertImported = db.prepare(`
+  INSERT INTO leads (name, phone, email, source, stage) VALUES (?, ?, ?, ?, ?)
+`);
+const insertImportNote = db.prepare(
+  'INSERT INTO interactions (lead_id, type, note) VALUES (?, ?, ?)'
+);
+
+router.post('/import', (req, res) => {
+  const parsed = importSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0].message });
+  }
+  const { leads, source, stage } = parsed.data;
+
+  const result = { imported: 0, duplicates: 0, invalid: 0 };
+  const seenPhones = new Set();
+  const seenNames = new Set();
+
+  const runImport = db.transaction(() => {
+    for (const row of leads) {
+      const name = row.name.trim();
+      if (!name) { result.invalid += 1; continue; }
+      const digits = (row.phone ?? '').replace(/\D/g, '');
+
+      if (digits) {
+        if (seenPhones.has(digits) || findByPhone.get(digits)) { result.duplicates += 1; continue; }
+        seenPhones.add(digits);
+      } else {
+        const nameKey = name.toLowerCase();
+        if (seenNames.has(nameKey)) { result.duplicates += 1; continue; }
+        seenNames.add(nameKey);
+      }
+
+      const info = insertImported.run(name, digits || null, row.email?.trim() || null, source, stage);
+      insertImportNote.run(info.lastInsertRowid, 'lead_recebido', 'Lead importado de planilha');
+      result.imported += 1;
+    }
+  });
+  runImport();
+
+  res.json(result);
+});
+
 router.get('/:id', (req, res) => {
   const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(req.params.id);
   if (!lead) return res.status(404).json({ error: 'Lead não encontrado.' });
