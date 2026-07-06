@@ -94,9 +94,10 @@ function IntegrationBanners() {
 
   const authWarning = !authLoading && authOn === false && (
     <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
-      <span className="font-medium">CRM sem login</span> — qualquer pessoa com o link acessa. Ative o
-      login com Google definindo <code className="text-xs">GOOGLE_CLIENT_ID</code> e{' '}
-      <code className="text-xs">ALLOWED_EMAILS</code> no servidor (passo a passo no README).
+      <span className="font-medium">CRM sem login</span> — qualquer pessoa com o link acessa. Para
+      ativar, defina no servidor as variáveis <code className="text-xs">ALLOWED_EMAILS</code> e{' '}
+      <code className="text-xs">LOGIN_PASSWORD</code> (e-mail + senha) e/ou{' '}
+      <code className="text-xs">GOOGLE_CLIENT_ID</code> (conta Google) — passo a passo no README.
     </div>
   );
 
