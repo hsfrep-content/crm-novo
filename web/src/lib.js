@@ -1,7 +1,7 @@
 // Cores das etapas: paleta categórica validada (CVD + contraste) para os
 // pontos do Kanban e as barras do funil no dashboard, em claro e escuro.
 export const STAGES = [
-  { id: 'novo_lead', label: 'Novo Lead', color: '#3E86C6', dot: 'bg-[#3E86C6]' },
+  { id: 'novo_lead', label: 'Leads Importação .csv', color: '#3E86C6', dot: 'bg-[#3E86C6]' },
   { id: 'contato_feito', label: 'Contato Feito', color: '#4A5FC1', dot: 'bg-[#4A5FC1]' },
   { id: 'visita_agendada', label: 'Visita Agendada', color: '#00A3A3', dot: 'bg-[#00A3A3]' },
   { id: 'proposta', label: 'Proposta', color: '#A87F1E', dot: 'bg-[#A87F1E]' },
