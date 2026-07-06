@@ -8,13 +8,13 @@ import { api } from '../api';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [state, setState] = useState({ loading: true, enabled: false, clientId: null, user: null });
+  const [state, setState] = useState({ loading: true, enabled: false, clientId: null, passwordLogin: false, user: null });
 
   const load = useCallback(async () => {
     try {
       const config = await api.auth.config();
       if (!config.enabled) {
-        setState({ loading: false, enabled: false, clientId: null, user: null });
+        setState({ loading: false, enabled: false, clientId: null, passwordLogin: false, user: null });
         return;
       }
       let user = null;
@@ -23,7 +23,13 @@ export function AuthProvider({ children }) {
       } catch {
         /* sem sessão */
       }
-      setState({ loading: false, enabled: true, clientId: config.clientId, user });
+      setState({
+        loading: false,
+        enabled: true,
+        clientId: config.clientId,
+        passwordLogin: Boolean(config.passwordLogin),
+        user,
+      });
     } catch {
       // backend fora do ar: tenta de novo em alguns segundos
       setTimeout(load, 4000);

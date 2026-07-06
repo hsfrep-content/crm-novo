@@ -2,15 +2,20 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { BrandLockup } from '../components/Layout';
+import { Button, Field, Input } from '../components/ui';
 
-// Tela de login — exclusivamente com conta Google (Google Identity Services).
+// Tela de login — conta Google autorizada e/ou e-mail + senha da equipe,
+// conforme o que estiver habilitado no servidor. Ambos restritos à allowlist.
 export default function Login() {
-  const { clientId, setUser } = useAuth();
+  const { clientId, passwordLogin, setUser } = useAuth();
   const buttonRef = useRef(null);
   const [error, setError] = useState(null);
   const [scriptFailed, setScriptFailed] = useState(false);
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!clientId) return;
     let cancelled = false;
 
     function renderButton() {
@@ -50,6 +55,20 @@ export default function Login() {
     return () => { cancelled = true; };
   }, [clientId, setUser]);
 
+  async function submitPassword(e) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const { user } = await api.auth.password(form.email, form.password);
+      setUser(user);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-900 p-4">
       <div className="w-full max-w-sm">
@@ -59,16 +78,57 @@ export default function Login() {
         <div className="rounded-2xl bg-white p-8 shadow-xl dark:bg-zinc-950/60 dark:ring-1 dark:ring-white/10">
           <h1 className="text-center text-lg font-semibold">Acessar o CRM</h1>
           <p className="mt-1 text-center text-sm text-zinc-500 dark:text-zinc-400">
-            Entre com sua conta Google autorizada.
+            Acesso restrito à equipe autorizada.
           </p>
-          <div className="mt-6 flex min-h-11 justify-center" ref={buttonRef} />
-          {scriptFailed && (
+
+          {passwordLogin && (
+            <form onSubmit={submitPassword} className="mt-6 space-y-3">
+              <Field label="E-mail">
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  placeholder="voce@exemplo.com"
+                  autoComplete="username"
+                  required
+                  autoFocus
+                />
+              </Field>
+              <Field label="Senha">
+                <Input
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+              </Field>
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting ? 'Entrando…' : 'Entrar'}
+              </Button>
+            </form>
+          )}
+
+          {passwordLogin && clientId && (
+            <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-zinc-400">
+              <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
+              ou
+              <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
+            </div>
+          )}
+
+          {clientId && <div className={`flex min-h-11 justify-center ${passwordLogin ? '' : 'mt-6'}`} ref={buttonRef} />}
+          {clientId && scriptFailed && (
             <p className="mt-3 text-center text-xs text-signal-600 dark:text-signal-300">
               Não foi possível carregar o login do Google. Verifique sua conexão e recarregue a página.
             </p>
           )}
+
           {error && (
-            <p className="mt-3 text-center text-sm text-signal-600 dark:text-signal-300">{error}</p>
+            <p className="mt-4 rounded-lg bg-signal-50 px-3 py-2 text-center text-sm text-signal-700 dark:bg-signal-500/10 dark:text-signal-300">
+              {error}
+            </p>
           )}
         </div>
         <p className="mt-6 text-center text-xs text-cream/40">

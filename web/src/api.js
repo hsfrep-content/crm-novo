@@ -42,6 +42,8 @@ export const api = {
     me: () => request('/api/auth/me'),
     google: (credential) =>
       request('/api/auth/google', { method: 'POST', body: JSON.stringify({ credential }) }),
+    password: (email, password) =>
+      request('/api/auth/password', { method: 'POST', body: JSON.stringify({ email, password }) }),
     logout: () => request('/api/auth/logout', { method: 'POST' }),
   },
   leads: {

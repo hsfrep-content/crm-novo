@@ -10,16 +10,21 @@ import { OAuth2Client } from 'google-auth-library';
 // Aprovado, emitimos uma sessão própria (HMAC-SHA256 com APP_SECRET) em
 // cookie httpOnly — o token do Google não é reutilizado depois disso.
 //
-// Sem GOOGLE_CLIENT_ID configurado o login fica DESATIVADO (modo aberto),
-// e o frontend exibe um aviso permanente para configurá-lo.
+// Caminho alternativo: e-mail + senha compartilhada (LOGIN_PASSWORD no .env),
+// restrito à mesma allowlist. Útil enquanto o OAuth do Google não está
+// configurado, ou como acesso de contingência.
+//
+// Sem GOOGLE_CLIENT_ID e sem LOGIN_PASSWORD o login fica DESATIVADO
+// (modo aberto), e o frontend exibe um aviso permanente para configurá-lo.
 
 const SESSION_COOKIE = 'advant_session';
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
 const clientId = process.env.GOOGLE_CLIENT_ID || null;
 const oauthClient = clientId ? new OAuth2Client(clientId) : null;
+const loginPassword = process.env.LOGIN_PASSWORD || null;
 
-export const authEnabled = Boolean(clientId);
+export const authEnabled = Boolean(clientId || loginPassword);
 
 // ALLOWED_EMAILS aceita e-mails e domínios: "ana@gmail.com, @aelimoveis.com.br"
 const allowed = (process.env.ALLOWED_EMAILS || '')
@@ -97,13 +102,67 @@ const cookieOptions = {
 
 export const authRouter = Router();
 
-// Público: diz ao frontend se o login está ativo e qual Client ID usar
+// Público: diz ao frontend quais métodos de login estão ativos
 authRouter.get('/config', (_req, res) => {
-  res.json({ enabled: authEnabled, clientId });
+  res.json({ enabled: authEnabled, clientId, passwordLogin: Boolean(loginPassword) });
+});
+
+// ---- Login por e-mail + senha compartilhada ----
+
+// Proteção contra força bruta: 8 tentativas erradas por IP a cada 10 minutos
+const attempts = new Map();
+function throttled(ip) {
+  const now = Date.now();
+  const entry = attempts.get(ip);
+  if (entry && entry.resetAt < now) attempts.delete(ip);
+  const current = attempts.get(ip);
+  return current && current.count >= 8;
+}
+function registerFailure(ip) {
+  const now = Date.now();
+  const entry = attempts.get(ip);
+  if (!entry || entry.resetAt < now) {
+    attempts.set(ip, { count: 1, resetAt: now + 10 * 60 * 1000 });
+  } else {
+    entry.count += 1;
+  }
+}
+
+const safeEqual = (a, b) => {
+  const ha = crypto.createHash('sha256').update(String(a)).digest();
+  const hb = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
+};
+
+authRouter.post('/password', (req, res) => {
+  if (!loginPassword) {
+    return res.status(400).json({ error: 'Login por senha não está habilitado no servidor.' });
+  }
+  if (throttled(req.ip)) {
+    return res.status(429).json({ error: 'Muitas tentativas. Aguarde 10 minutos e tente de novo.' });
+  }
+  const email = String(req.body?.email ?? '').trim().toLowerCase();
+  const password = String(req.body?.password ?? '');
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Informe e-mail e senha.' });
+  }
+  if (allowed.length === 0) {
+    return res.status(403).json({ error: 'Nenhum e-mail autorizado configurado (ALLOWED_EMAILS).' });
+  }
+  // Mensagem única para e-mail não autorizado e senha errada — não revela
+  // quais e-mails existem na lista.
+  if (!emailAllowed(email) || !safeEqual(password, loginPassword)) {
+    registerFailure(req.ip);
+    return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
+  }
+  attempts.delete(req.ip);
+  const user = { email, name: email.split('@')[0], picture: null };
+  res.cookie(SESSION_COOKIE, createSessionToken(user), cookieOptions);
+  res.json({ user });
 });
 
 authRouter.post('/google', async (req, res) => {
-  if (!authEnabled) return res.status(400).json({ error: 'Login não configurado no servidor.' });
+  if (!oauthClient) return res.status(400).json({ error: 'Login com Google não configurado no servidor.' });
   const credential = req.body?.credential;
   if (typeof credential !== 'string' || !credential) {
     return res.status(400).json({ error: 'Credencial ausente.' });

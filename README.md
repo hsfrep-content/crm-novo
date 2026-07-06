@@ -109,11 +109,27 @@ ALLOWED_EMAILS=seuemail@gmail.com
 
 O redeploy é automático. A partir daí a tela de login aparece, e só as contas listadas entram.
 
+**Login por e-mail + senha (alternativa ou complemento ao Google):**
+
+Defina também (ou apenas) a variável `LOGIN_PASSWORD` — a tela de login passa a aceitar
+e-mail + essa senha compartilhada, **restrita aos mesmos e-mails de `ALLOWED_EMAILS`**:
+
+```
+ALLOWED_EMAILS=hsfrep@gmail.com,contato@aelimoveis.com.br
+LOGIN_PASSWORD=uma-senha-forte
+```
+
+Funciona sem nenhuma configuração no Google (ideal para ativar a proteção imediatamente).
+Tentativas de senha erradas são limitadas a 8 por IP a cada 10 minutos.
+
 **Notas:**
 - Para liberar um novo corretor: adicione o e-mail em `ALLOWED_EMAILS` (o Railway redeploya).
   Remover um e-mail da lista revoga o acesso imediatamente, mesmo com sessão ativa.
+- Para trocar a senha compartilhada: edite `LOGIN_PASSWORD` no Railway. Sessões já abertas
+  continuam válidas até expirarem (7 dias) — os e-mails continuam controlados pela allowlist.
 - A sessão dura 7 dias, em cookie httpOnly assinado com o `APP_SECRET`.
-- Sem `GOOGLE_CLIENT_ID` o CRM roda em modo aberto (útil em desenvolvimento) com um banner de aviso.
+- Sem `GOOGLE_CLIENT_ID` e sem `LOGIN_PASSWORD` o CRM roda em modo aberto (útil em
+  desenvolvimento) com um banner de aviso.
 
 Nenhum segredo fica hardcoded: a chave Tecimob entra pela tela de **Configurações**, é
 criptografada e nunca volta ao navegador.
