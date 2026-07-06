@@ -113,6 +113,7 @@ if (!errorLeadCols.includes('source')) {
 db.prepare(`DELETE FROM webhook_logs WHERE received_at < datetime('now', '-90 days')`).run();
 
 export const STAGES = [
+  'importado',
   'novo_lead',
   'contato_feito',
   'visita_agendada',
@@ -135,4 +136,17 @@ export function setSetting(key, value) {
 
 export function touchLead(id) {
   db.prepare(`UPDATE leads SET updated_at = datetime('now') WHERE id = ?`).run(id);
+}
+
+// Migração única: leads importados de planilha que ainda estavam na etapa
+// inicial vão para a coluna própria "importado". Roda uma vez só (flag em
+// settings) para não desfazer movimentações manuais feitas depois.
+if (getSetting('migrated_stage_importado') !== '1') {
+  const moved = db
+    .prepare(`UPDATE leads SET stage = 'importado' WHERE source = 'importacao' AND stage = 'novo_lead'`)
+    .run();
+  setSetting('migrated_stage_importado', '1');
+  if (moved.changes > 0) {
+    console.log(`[db] migração: ${moved.changes} leads importados movidos para a etapa "importado"`);
+  }
 }

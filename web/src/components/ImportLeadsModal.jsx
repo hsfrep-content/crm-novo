@@ -64,13 +64,13 @@ const BATCH_SIZE = 500;
 export default function ImportLeadsModal({ open, onClose, onImported }) {
   const [parsed, setParsed] = useState(null);
   const [fileName, setFileName] = useState('');
-  const [stage, setStage] = useState('novo_lead');
+  const [stage, setStage] = useState('importado');
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
   function reset() {
-    setParsed(null); setFileName(''); setResult(null); setError(null); setStage('novo_lead');
+    setParsed(null); setFileName(''); setResult(null); setError(null); setStage('importado');
   }
 
   async function onFile(e) {
